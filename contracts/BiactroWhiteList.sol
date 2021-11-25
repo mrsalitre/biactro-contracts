@@ -5,9 +5,9 @@ pragma solidity >=0.8.0 <0.9.0;
 contract BiactroWhiteList {
   
   uint memberCount;
-  uint maxMembers;
-  address owner;
+  uint maxMembers = 100;
   string errorMessage;
+  address owner;
 
   struct Member {
     address user;
@@ -15,7 +15,10 @@ contract BiactroWhiteList {
   }
 
   mapping(address => bool) public membersSigned;
+  mapping(address => bool) public reserveSigned;
+
   Member[] membersList;
+  Member[] reservationList;
 
   constructor() {
     owner = msg.sender;
@@ -29,13 +32,29 @@ contract BiactroWhiteList {
     }
     // Check if the list is full
     if (memberCount >= maxMembers) {
-      revert('maximum number of members reached');
+      revert('Maximum number of members reached');
     }
     // Add the signer to the list
     membersList.push(Member(msg.sender, block.timestamp));
     membersSigned[msg.sender] = true;
     memberCount++;
   }
+
+  // A function to add a member to the reservation list
+  function addReservation() public {
+    // Check if the signer is already in the members list
+    if (membersSigned[msg.sender]) {
+      revert('Address has already signed');
+    }
+    // Check if the signer is already in the reservation list
+    if (reserveSigned[msg.sender]) {
+      revert('Address already reserved');
+    }
+    // Add the signer to the list
+    reservationList.push(Member(msg.sender, block.timestamp));
+    reserveSigned[msg.sender] = true;
+  }
+
   // A function to set the maximum number of members
   // This function can only be called by the owner of the contract
   function setMaxMembers(uint _maxMembers) public {
@@ -64,5 +83,15 @@ contract BiactroWhiteList {
   // A function to get if the address is in the list
   function isMember(address _address) public view returns (bool) {
     return membersSigned[_address];
+  }
+
+  // A function to get if the address is in the reservation list
+  function isReservation(address _address) public view returns (bool) {
+    return reserveSigned[_address];
+  }
+
+  // A function to get all the reservations
+  function getReservations() public view returns (Member[] memory) {
+    return reservationList;
   }
 }
