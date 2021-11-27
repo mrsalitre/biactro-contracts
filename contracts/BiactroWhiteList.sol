@@ -15,13 +15,11 @@ contract BiactroWhiteList {
   }
 
   mapping(address => bool) public membersSigned;
-  mapping(address => bool) public reserveSigned;
 
   Member[] membersList;
   Member[] reservationList;
 
   event newPreFounder(address wallet, uint256 timestamp);
-  event newMemberInReservation(address wallet, uint256 timestamp);
 
   constructor() {
     owner = msg.sender;
@@ -42,22 +40,6 @@ contract BiactroWhiteList {
     membersSigned[msg.sender] = true;
     memberCount++;
     emit newPreFounder(msg.sender, block.timestamp);
-  }
-
-  // A function to add a member to the reservation list
-  function addReservation() public {
-    // Check if the signer is already in the members list
-    if (membersSigned[msg.sender]) {
-      revert('Address has already signed');
-    }
-    // Check if the signer is already in the reservation list
-    if (reserveSigned[msg.sender]) {
-      revert('Address already reserved');
-    }
-    // Add the signer to the list
-    reservationList.push(Member(msg.sender, block.timestamp));
-    reserveSigned[msg.sender] = true;
-    emit newMemberInReservation(msg.sender, block.timestamp);
   }
 
   // A function to set the maximum number of members
@@ -93,11 +75,6 @@ contract BiactroWhiteList {
   // A function to get if the address is in the list
   function isMember(address _address) public view returns (bool) {
     return membersSigned[_address];
-  }
-
-  // A function to get if the address is in the reservation list
-  function isReservation(address _address) public view returns (bool) {
-    return reserveSigned[_address];
   }
 
   // A function to get all the reservations
