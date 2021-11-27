@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.8.4 <0.9.0;
+pragma solidity >=0.8.0 <0.9.0;
 
 contract BiactroWhiteList {
   
@@ -20,6 +20,9 @@ contract BiactroWhiteList {
   Member[] membersList;
   Member[] reservationList;
 
+  event newPreFounder(address wallet, uint256 timestamp);
+  event newMemberInReservation(address wallet, uint256 timestamp);
+
   constructor() {
     owner = msg.sender;
   }
@@ -38,6 +41,7 @@ contract BiactroWhiteList {
     membersList.push(Member(msg.sender, block.timestamp));
     membersSigned[msg.sender] = true;
     memberCount++;
+    emit newPreFounder(msg.sender, block.timestamp);
   }
 
   // A function to add a member to the reservation list
@@ -53,6 +57,7 @@ contract BiactroWhiteList {
     // Add the signer to the list
     reservationList.push(Member(msg.sender, block.timestamp));
     reserveSigned[msg.sender] = true;
+    emit newMemberInReservation(msg.sender, block.timestamp);
   }
 
   // A function to set the maximum number of members
@@ -64,7 +69,7 @@ contract BiactroWhiteList {
     }
     // Check if the new maximum number of members is greater than the current number of members
     if (_maxMembers <= memberCount) {
-    revert();
+      revert('You can only extend the list');
     }
     // Set the new maximum number of members
     maxMembers = _maxMembers;

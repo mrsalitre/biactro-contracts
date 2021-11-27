@@ -22,7 +22,7 @@ const main = async () => {
     let membersCount = await biactroWhiteListContract.getMemberCount();
     console.log(`Members count: ${membersCount}`);
 
-    let addMemberLimitTx = await biactroWhiteListContract.setMaxMembers(1);
+    let addMemberLimitTx = await biactroWhiteListContract.setMaxMembers(101);
     await addMemberLimitTx.wait();
 
     await addMemberTx.wait();
