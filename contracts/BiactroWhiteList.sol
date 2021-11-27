@@ -80,6 +80,11 @@ contract BiactroWhiteList {
     return membersList;
   }
 
+  // A funtion to get the max number of members
+  function getMaxMembers() public view returns (uint) {
+    return maxMembers;
+  }
+
   // A function to get the number of members
   function getMemberCount() public view returns (uint) {
     return memberCount;

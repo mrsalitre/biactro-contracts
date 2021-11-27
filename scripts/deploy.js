@@ -1,8 +1,13 @@
 const main = async () => {
-  const biactroWhiteListFactory = await hre.ethers.getContractFactory('SayHi');
+  const [deployer] = await hre.ethers.getSigners();
+    
+  console.log('Deploying contracts with account: ', deployer.address);
+  
+  const biactroWhiteListFactory = await hre.ethers.getContractFactory('BiactroWhiteList');
   const biactroWhiteListContract = await biactroWhiteListFactory.deploy();
   
   await biactroWhiteListContract.deployed();
+  console.log('Contract address: ', biactroWhiteListContract.address);
 };
 
 const runMain = async () => {
