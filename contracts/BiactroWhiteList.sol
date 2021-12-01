@@ -13,11 +13,11 @@ contract BiactroWhiteList is Ownable {
 
   struct Member {
     address user;
+    uint256 tokenId;
     uint256 timestamp;
   }
 
-  mapping(address => bool) membersSigned;
-  mapping(address => uint) membersReservedTokens;
+  mapping(address => uint) membersSigned;
   mapping(uint => bool) asignedNumbers;
 
   Member[] membersList;
@@ -30,7 +30,7 @@ contract BiactroWhiteList is Ownable {
   function addMember(uint _tokenID) public {
     require(reservationIsActive, "Reservation is closed");
     // Check if the signer is already in the list
-    if (membersSigned[msg.sender]) {
+    if (membersSigned[msg.sender] != 0) {
       revert('Address has already signed');
     }
     if (_tokenID < 0 || _tokenID > 40900) {
@@ -50,13 +50,10 @@ contract BiactroWhiteList is Ownable {
   function saveMember(uint _tokenID) internal {
     
     // Add the signer to the list
-    membersList.push(Member(msg.sender, block.timestamp));
+    membersList.push(Member(msg.sender, _tokenID, block.timestamp));
     
     // Save the signer in the mapping
-    membersSigned[msg.sender] = true;
-    
-    // Save the tokenID in reserved tokens mapping
-    membersReservedTokens[msg.sender] = _tokenID;
+    membersSigned[msg.sender] = _tokenID;
     
     // Save the tokenID in asigned numbers mapping
     asignedNumbers[_tokenID] = true;
@@ -83,7 +80,7 @@ contract BiactroWhiteList is Ownable {
   }
 
   // A function to get if the address is in the list
-  function isMember(address _address) public view returns (bool) {
+  function isMember(address _address) public view returns (uint) {
     return membersSigned[_address];
   }
   
