@@ -19,12 +19,13 @@ const main = async () => {
     let addMemberTx = await biactroWhiteListContract.addMember(1);
     await addMemberTx.wait();
 
-    let renounceOwnership = await biactroWhiteListContract.renounceOwnership();
-    await renounceOwnership.wait();
-
+    
     let transferOwnership = await biactroWhiteListContract.transferOwnership(randomPerson.address);
     await transferOwnership.wait();
-
+    
+    let renounceOwnership = await biactroWhiteListContract.renounceOwnership();
+    await renounceOwnership.wait();
+    
     addMemberTx = await biactroWhiteListContract.connect(randomPerson).addMember(1);
     await addMemberTx.wait();
 

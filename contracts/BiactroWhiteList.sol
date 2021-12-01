@@ -96,7 +96,7 @@ contract BiactroWhiteList is Ownable {
 
   // A function to check if a token is available
   function isTokenAvailable(uint _tokenID) public view returns (bool) {
-    return asignedNumbers[_tokenID];
+    return !asignedNumbers[_tokenID];
   }
 
   // A function to know if the reservation is active
