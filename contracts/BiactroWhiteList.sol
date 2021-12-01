@@ -9,7 +9,6 @@ contract BiactroWhiteList is Ownable {
   bool reservationIsActive = true;
   uint memberCount;
   uint maxMembers = 900;
-  string errorMessage;
 
   struct Member {
     address user;
@@ -28,21 +27,24 @@ contract BiactroWhiteList is Ownable {
 
   // A function to save the address of the signer
   function addMember(uint _tokenID) public {
+    
+    // Check if reservation is active
     require(reservationIsActive, "Reservation is closed");
+    
     // Check if the signer is already in the list
-    if (membersSigned[msg.sender] != 0) {
-      revert('Address has already signed');
+    require(!isMember(msg.sender), "You are already in the list");
+    
+    // Check if the selected token is on range
+    if (_tokenID < 0 || _tokenID > 40950) {
+      revert("Token ID is invalid");
     }
-    if (_tokenID < 0 || _tokenID > 40900) {
-      revert('Token ID is invalid');
-    }
-    if (asignedNumbers[_tokenID]) {
-      revert('Token has already been taken');
-    }
+
+    // Check if the token has been taken
+    require(isTokenAvailable(_tokenID), "Token is not available");
+    
     // Check if the list is full
     if (memberCount >= maxMembers) {
-      reservationIsActive = false;
-      revert('List is full');
+      revert("List is full");
     }
     saveMember(_tokenID);
   }
@@ -60,6 +62,10 @@ contract BiactroWhiteList is Ownable {
     
     // Increase the number of members
     memberCount++;
+
+    if (memberCount >= maxMembers) {
+      reservationIsActive = false;
+    }
 
     emit newPreFounder(msg.sender, block.timestamp);
   }
@@ -80,11 +86,31 @@ contract BiactroWhiteList is Ownable {
   }
 
   // A function to get if the address is in the list
-  function isMember(address _address) public view returns (uint) {
-    return membersSigned[_address];
+  function isMember(address _address) public view returns (bool) {
+    if (membersSigned[_address] != 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  // A function to check if a token is available
+  function isTokenAvailable(uint _tokenID) public view returns (bool) {
+    return asignedNumbers[_tokenID];
+  }
+
+  // A function to know if the reservation is active
+  function isReservationActive() public view returns (bool) {
+    return reservationIsActive;
   }
   
+  // A function to toggle the reservation
   function switchReservation(bool _opened) public onlyOwner {
     reservationIsActive = _opened;
+  }
+
+  // A function only callable by owner that saves id tokens inside the asignedNumbers mapping
+  function saveToken(uint _tokenIDs) public onlyOwner {
+    asignedNumbers[_tokenIDs] = true;
   }
 }

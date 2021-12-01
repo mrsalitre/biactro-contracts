@@ -24,6 +24,7 @@ contract BiactroFoundersNFT is ERC721, IERC2981, ReentrancyGuard, Ownable {
 
   Counters.Counter private supplyCounter;
 
+  // TODO: to check if the id is not reserved in BiactroWhitelist
   function mint(uint256 id) public payable nonReentrant {
     require(saleIsActive, "Sale not active");
 
@@ -37,6 +38,11 @@ contract BiactroFoundersNFT is ERC721, IERC2981, ReentrancyGuard, Ownable {
 
     supplyCounter.increment();
   }
+
+  // TODO: a function to mint the token a user has reserved.
+  // once the wallet triggers the function, the token id saved in reservation list shoould change to 0.
+
+  // TODO: a function to give away the NFT to a user.
 
   function totalSupply() public view returns (uint256) {
     return supplyCounter.current();
