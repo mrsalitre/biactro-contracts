@@ -1,60 +1,70 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.8.0 <0.9.0;
+pragma solidity >=0.8.4 <0.9.0;
 
-contract BiactroWhiteList {
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract BiactroWhiteList is Ownable {
   
+  bool reservationIsActive = true;
   uint memberCount;
-  uint maxMembers = 100;
+  uint maxMembers = 900;
   string errorMessage;
-  address owner;
 
   struct Member {
     address user;
     uint256 timestamp;
   }
 
-  mapping(address => bool) public membersSigned;
+  mapping(address => bool) membersSigned;
+  mapping(address => uint) membersReservedTokens;
+  mapping(uint => bool) asignedNumbers;
 
   Member[] membersList;
-  Member[] reservationList;
 
   event newPreFounder(address wallet, uint256 timestamp);
 
-  constructor() {
-    owner = msg.sender;
-  }
+  constructor() {}
 
   // A function to save the address of the signer
-  function addMember() public {
+  function addMember(uint _tokenID) public {
+    require(reservationIsActive, "Reservation is closed");
     // Check if the signer is already in the list
     if (membersSigned[msg.sender]) {
       revert('Address has already signed');
     }
+    if (_tokenID < 0 || _tokenID > 40900) {
+      revert('Token ID is invalid');
+    }
+    if (asignedNumbers[_tokenID]) {
+      revert('Token has already been taken');
+    }
     // Check if the list is full
     if (memberCount >= maxMembers) {
-      revert('Maximum number of members reached');
+      reservationIsActive = false;
+      revert('List is full');
     }
-    // Add the signer to the list
-    membersList.push(Member(msg.sender, block.timestamp));
-    membersSigned[msg.sender] = true;
-    memberCount++;
-    emit newPreFounder(msg.sender, block.timestamp);
+    saveMember(_tokenID);
   }
 
-  // A function to set the maximum number of members
-  // This function can only be called by the owner of the contract
-  function setMaxMembers(uint _maxMembers) public {
-    // Check if the sender is the owner
-    if (msg.sender != owner) {
-      revert('Only the owner can set the maximum number of members');
-    }
-    // Check if the new maximum number of members is greater than the current number of members
-    if (_maxMembers <= memberCount) {
-      revert('You can only extend the list');
-    }
-    // Set the new maximum number of members
-    maxMembers = _maxMembers;
+  function saveMember(uint _tokenID) internal {
+    
+    // Add the signer to the list
+    membersList.push(Member(msg.sender, block.timestamp));
+    
+    // Save the signer in the mapping
+    membersSigned[msg.sender] = true;
+    
+    // Save the tokenID in reserved tokens mapping
+    membersReservedTokens[msg.sender] = _tokenID;
+    
+    // Save the tokenID in asigned numbers mapping
+    asignedNumbers[_tokenID] = true;
+    
+    // Increase the number of members
+    memberCount++;
+
+    emit newPreFounder(msg.sender, block.timestamp);
   }
 
   // A function to get all the members
@@ -76,9 +86,8 @@ contract BiactroWhiteList {
   function isMember(address _address) public view returns (bool) {
     return membersSigned[_address];
   }
-
-  // A function to get all the reservations
-  function getReservations() public view returns (Member[] memory) {
-    return reservationList;
+  
+  function switchReservation(bool _opened) public onlyOwner {
+    reservationIsActive = _opened;
   }
 }

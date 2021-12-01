@@ -1,6 +1,6 @@
 const main = async () => {
 
-    const [owner] = await hre.ethers.getSigners();
+    const [owner, randomPerson] = await hre.ethers.getSigners();
 
     // Compile our contract
     const biactroWhiteListFactory = await hre.ethers.getContractFactory("BiactroWhiteList");
@@ -16,19 +16,21 @@ const main = async () => {
     console.log(`Contract deployed to ${address}`);
     console.log("Contract deployed by:", owner.address);
 
-    let addMemberTx = await biactroWhiteListContract.addMember();
+    let addMemberTx = await biactroWhiteListContract.addMember(1);
     await addMemberTx.wait();
+
+    let renounceOwnership = await biactroWhiteListContract.renounceOwnership();
+    await renounceOwnership.wait();
+
+    let transferOwnership = await biactroWhiteListContract.transferOwnership(randomPerson.address);
+    await transferOwnership.wait();
+
+    addMemberTx = await biactroWhiteListContract.connect(randomPerson).addMember(1);
+    await addMemberTx.wait();
+
 
     let membersCount = await biactroWhiteListContract.getMemberCount();
     console.log(`Members count: ${membersCount}`);
-
-    let addMemberLimitTx = await biactroWhiteListContract.setMaxMembers(101);
-    await addMemberLimitTx.wait();
-
-    await addMemberTx.wait();
-
-    let allMembers = await biactroWhiteListContract.getMembers();
-    console.log(allMembers);
 }
 
 // Run the main function
