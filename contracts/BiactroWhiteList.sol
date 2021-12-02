@@ -111,6 +111,10 @@ contract BiactroWhiteList is Ownable {
 
   // A function only callable by owner that saves id tokens inside the asignedNumbers mapping
   function saveToken(uint _tokenIDs) public onlyOwner {
-    asignedNumbers[_tokenIDs] = true;
+    if (!asignedNumbers[_tokenIDs]) {
+      asignedNumbers[_tokenIDs] = true;
+    } else {
+      revert();
+    }
   }
 }

@@ -16,16 +16,16 @@ const main = async () => {
     console.log(`Contract deployed to ${address}`);
     console.log("Contract deployed by:", owner.address);
 
-    let addMemberTx = await biactroWhiteListContract.addMember(1);
+
+    let isMember = await biactroWhiteListContract.isMember(owner.address);
+    console.log("Is member:", isMember);
+
+    let switchReservationTx = await biactroWhiteListContract.switchReservation(false);
+    await switchReservationTx.wait();
+
+    addMemberTx = await biactroWhiteListContract.addMember(1);
     await addMemberTx.wait();
 
-    
-    let transferOwnership = await biactroWhiteListContract.transferOwnership(randomPerson.address);
-    await transferOwnership.wait();
-    
-    let renounceOwnership = await biactroWhiteListContract.renounceOwnership();
-    await renounceOwnership.wait();
-    
     addMemberTx = await biactroWhiteListContract.connect(randomPerson).addMember(1);
     await addMemberTx.wait();
 
