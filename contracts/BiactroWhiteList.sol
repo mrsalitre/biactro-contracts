@@ -8,22 +8,17 @@ contract BiactroWhiteList is Ownable {
   
   bool reservationIsActive = true;
   uint memberCount;
-  uint maxMembers = 900;
-
-  struct Member {
-    address user;
-    uint256 tokenId;
-    uint256 timestamp;
-  }
+  uint maxMembers = 100;
 
   mapping(address => uint) membersSigned;
   mapping(uint => bool) asignedNumbers;
 
-  Member[] membersList;
 
   event newPreFounder(address wallet, uint256 timestamp);
 
-  constructor() {}
+  constructor() {
+    maxMembers = 100;
+  }
 
   // A function to save the address of the signer
   function addMember(uint _tokenID) public {
@@ -32,7 +27,7 @@ contract BiactroWhiteList is Ownable {
     require(reservationIsActive, "Reservation is closed");
     
     // Check if the signer is already in the list
-    require(!isMember(msg.sender), "You are already in the list");
+    require(isMember(msg.sender), "You are already in the list");
     
     // Check if the selected token is on range
     if (_tokenID < 0 || _tokenID > 40950) {
@@ -51,10 +46,7 @@ contract BiactroWhiteList is Ownable {
 
   function saveMember(uint _tokenID) internal {
     
-    // Add the signer to the list
-    membersList.push(Member(msg.sender, _tokenID, block.timestamp));
-    
-    // Save the signer in the mapping
+    // Save the signer in the signed members mapping
     membersSigned[msg.sender] = _tokenID;
     
     // Save the tokenID in asigned numbers mapping
@@ -63,16 +55,12 @@ contract BiactroWhiteList is Ownable {
     // Increase the number of members
     memberCount++;
 
+    // Close reservation if the list is full
     if (memberCount >= maxMembers) {
       reservationIsActive = false;
     }
 
     emit newPreFounder(msg.sender, block.timestamp);
-  }
-
-  // A function to get all the members
-  function getMembers() public view returns (Member[] memory) {
-    return membersList;
   }
 
   // A funtion to get the max number of members
@@ -87,16 +75,12 @@ contract BiactroWhiteList is Ownable {
 
   // A function to get if the address is in the list
   function isMember(address _address) public view returns (bool) {
-    if (membersSigned[_address] != 0) {
-      return true;
-    } else {
-      return false;
-    }
+    return membersSigned[_address] != 0;
   }
 
   // A function to check if a token is available
   function isTokenAvailable(uint _tokenID) public view returns (bool) {
-    return !asignedNumbers[_tokenID];
+    return asignedNumbers[_tokenID] == false;
   }
 
   // A function to know if the reservation is active
@@ -110,9 +94,10 @@ contract BiactroWhiteList is Ownable {
   }
 
   // A function only callable by owner that saves id tokens inside the asignedNumbers mapping
-  function saveToken(uint _tokenIDs) public onlyOwner {
+  function saveToken(address _address, uint _tokenIDs) public onlyOwner {
     if (!asignedNumbers[_tokenIDs]) {
       asignedNumbers[_tokenIDs] = true;
+      membersSigned[_address] = _tokenIDs;
     } else {
       revert();
     }
