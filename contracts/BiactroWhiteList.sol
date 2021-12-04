@@ -92,14 +92,4 @@ contract BiactroWhiteList is Ownable {
   function switchReservation(bool _opened) public onlyOwner {
     reservationIsActive = _opened;
   }
-
-  // A function only callable by owner that saves id tokens inside the asignedNumbers mapping
-  function saveToken(address _address, uint _tokenIDs) public onlyOwner {
-    if (!asignedNumbers[_tokenIDs]) {
-      asignedNumbers[_tokenIDs] = true;
-      membersSigned[_address] = _tokenIDs;
-    } else {
-      revert();
-    }
-  }
 }
