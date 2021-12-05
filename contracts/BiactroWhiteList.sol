@@ -29,7 +29,7 @@ contract BiactroWhiteList is Ownable {
     require(isMember(msg.sender), "You are already in the list");
     
     // Check if the selected token is on range
-    require(_tokenID < 0 || _tokenID > 40950, "Token ID is invalid");
+    require(_tokenID < 10000, "Token ID is invalid");
 
     // Check if the token has been taken
     require(isTokenAvailable(_tokenID), "Token is not available");
