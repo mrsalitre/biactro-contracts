@@ -18,15 +18,12 @@ const main = async () => {
 
 
     let isMember = await biactroWhiteListContract.isMember(owner.address);
-    console.log("Is member:", isMember);
-
-    let switchReservationTx = await biactroWhiteListContract.switchReservation(false);
-    await switchReservationTx.wait();
-
+    console.log("Free member:", isMember);
+    
     addMemberTx = await biactroWhiteListContract.addMember(1);
     await addMemberTx.wait();
 
-    addMemberTx = await biactroWhiteListContract.connect(randomPerson).addMember(1);
+    addMemberTx = await biactroWhiteListContract.connect(randomPerson).addMember(2);
     await addMemberTx.wait();
 
 
