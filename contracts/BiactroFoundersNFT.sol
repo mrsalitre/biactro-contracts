@@ -4,6 +4,7 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
@@ -15,7 +16,13 @@ contract ProxyRegistry {
   mapping(address => OwnableDelegateProxy) public proxies;
 }
 
-contract BiactroFoundersNFT is ERC721, IERC2981, ReentrancyGuard, Ownable {
+contract BiactroFoundersNFT is
+ERC721,
+ERC721Enumerable,
+IERC2981,
+ReentrancyGuard,
+Ownable
+{
   using Counters for Counters.Counter;
 
   constructor (string memory customBaseURI_, address proxyRegistryAddress_)
@@ -32,8 +39,6 @@ contract BiactroFoundersNFT is ERC721, IERC2981, ReentrancyGuard, Ownable {
 
   uint256 public constant PRICE = 60000000000000000;
 
-  Counters.Counter private supplyCounter;
-
   function mint(uint256 id) public payable nonReentrant {
     require(saleIsActive, "Sale not active");
 
@@ -44,12 +49,6 @@ contract BiactroFoundersNFT is ERC721, IERC2981, ReentrancyGuard, Ownable {
     require(id < MAX_SUPPLY, "Invalid token id");
 
     _safeMint(_msgSender(), id);
-
-    supplyCounter.increment();
-  }
-
-  function totalSupply() public view returns (uint256) {
-    return supplyCounter.current();
   }
 
   /** ACTIVATION **/
@@ -70,6 +69,12 @@ contract BiactroFoundersNFT is ERC721, IERC2981, ReentrancyGuard, Ownable {
 
   function _baseURI() internal view virtual override returns (string memory) {
     return customBaseURI;
+  }
+
+  function tokenURI(uint256 tokenId) public view override
+    returns (string memory)
+  {
+    return string(abi.encodePacked(super.tokenURI(tokenId), ".json"));
   }
 
   /** PAYOUT **/
@@ -93,11 +98,18 @@ contract BiactroFoundersNFT is ERC721, IERC2981, ReentrancyGuard, Ownable {
     return (address(this), (salePrice * 500) / 10000);
   }
 
+  function _beforeTokenTransfer(address from, address to, uint256 tokenId)
+      internal
+      override(ERC721, ERC721Enumerable)
+  {
+      super._beforeTokenTransfer(from, to, tokenId);
+  }
+
   function supportsInterface(bytes4 interfaceId)
     public
     view
     virtual
-    override(ERC721, IERC165)
+    override(ERC721, ERC721Enumerable, IERC165)
     returns (bool)
   {
     return (
