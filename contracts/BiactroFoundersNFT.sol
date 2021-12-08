@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.9;
+pragma solidity >=0.8.4 <0.9.0;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
@@ -9,6 +9,7 @@ import "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+import "hardhat/console.sol";
 
 contract OwnableDelegateProxy {}
 
@@ -35,18 +36,31 @@ Ownable
 
   /** MINTING **/
 
+  uint256 public constant PRE_SALE_DATE = 1641340800; // Wednesday, 5 January 2022
+
+  uint256 public constant MAX_PRE_SALE_SUPPLY = 900;
+
   uint256 public constant MAX_SUPPLY = 10000;
+
+  uint256 public constant PRE_SALE_PRICE = 15000000000000000;
 
   uint256 public constant PRICE = 60000000000000000;
 
   function mint(uint256 id) public payable nonReentrant {
+    // Check if the sale is active
     require(saleIsActive, "Sale not active");
+    
+    // Check if presale is active
+    bool isPresale = (PRE_SALE_DATE <= block.timestamp) && preSaleIsActive;
 
-    require(totalSupply() < MAX_SUPPLY, "Exceeds max supply");
+    // Check if there`s enough tokens to mint
+    require(totalSupply() < (isPresale ? MAX_PRE_SALE_SUPPLY : MAX_SUPPLY), "Exceeds max actual supply");
 
-    require(msg.value >= PRICE, "Insufficient payment, 0.06 ETH per item");
+    // Check if the value is correct
+    require(msg.value >= (isPresale ? PRE_SALE_PRICE : PRICE), "Insufficient actual payment value");
 
-    require(id < MAX_SUPPLY, "Invalid token id");
+    // Check the user is not requiring an invalid token
+    require(id < MAX_SUPPLY && id > 0, "Invalid token id");
 
     _safeMint(_msgSender(), id);
   }
@@ -54,9 +68,15 @@ Ownable
   /** ACTIVATION **/
 
   bool public saleIsActive = true;
+  
+  bool public preSaleIsActive = true;
 
   function setSaleIsActive(bool saleIsActive_) external onlyOwner {
     saleIsActive = saleIsActive_;
+  }
+
+  function setPreSaleIsActive(bool preSaleIsActive_) external onlyOwner {
+    preSaleIsActive = preSaleIsActive_;
   }
 
   /** URI HANDLING **/
@@ -69,12 +89,6 @@ Ownable
 
   function _baseURI() internal view virtual override returns (string memory) {
     return customBaseURI;
-  }
-
-  function tokenURI(uint256 tokenId) public view override
-    returns (string memory)
-  {
-    return string(abi.encodePacked(super.tokenURI(tokenId), ".json"));
   }
 
   /** PAYOUT **/
