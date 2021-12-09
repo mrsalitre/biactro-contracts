@@ -4,7 +4,7 @@ const main = async () => {
     console.log('Deploying contracts with account: ', deployer.address);
 
     const BiactroFoundersNFTFactory = await hre.ethers.getContractFactory('BiactroFoundersNFT');
-    const BiactroFoundersNFTContract = await BiactroFoundersNFTFactory.deploy('ipfs://QmfLCLmb3TvFgnJccCBVVSVWsg6jaepsXoW5wxpFV14mhc/', deployer.address);
+    const BiactroFoundersNFTContract = await BiactroFoundersNFTFactory.deploy('ipfs://QmfLCLmb3TvFgnJccCBVVSVWsg6jaepsXoW5wxpFV14mhc/', '0xf57b2c51ded3a29e6891aba85459d600256cf317');
 
     await BiactroFoundersNFTContract.deployed();
 

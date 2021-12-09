@@ -6,24 +6,23 @@ const main = async () => {
     const BiactroFoundersNFTFactory = await hre.ethers.getContractFactory("BiactroFoundersNFT");
 
     // Deploy our contract
-    const BiactroFoundersNFTContract = await BiactroFoundersNFTFactory.deploy('ipfs://QmfLCLmb3TvFgnJccCBVVSVWsg6jaepsXoW5wxpFV14mhc/', owner.address);
+    const BiactroFoundersNFTContract = await BiactroFoundersNFTFactory.deploy('ipfs://QmfLCLmb3TvFgnJccCBVVSVWsg6jaepsXoW5wxpFV14mhc/', '0xf57b2c51ded3a29e6891aba85459d600256cf317');
 
     // Wait for the minted process to finish
     await BiactroFoundersNFTContract.deployed();
 
-    const mint = await BiactroFoundersNFTContract.mint(1, { value: ethers.utils.parseUnits('80000000', 'gwei') });
-    mint.wait();
+    await BiactroFoundersNFTContract.mint(2);
 
-    const metadata = await BiactroFoundersNFTContract.tokenURI(1);
-    console.log('Metadata: ', metadata);
+    console.log("token exists: " + await BiactroFoundersNFTContract.exists(1));
+
+    await BiactroFoundersNFTContract.mint(1);
+
+    console.log("token exists: " + await BiactroFoundersNFTContract.exists(1));
 
     // Get the address of the contract
     const address = BiactroFoundersNFTContract.address;
     console.log(`Contract deployed to ${address}`);
     console.log("Contract deployed by:", owner.address);
-
-    addMemberTx = await BiactroFoundersNFTContract.mint(1);
-    await addMemberTx.wait();
 }
 
 // Run the main function

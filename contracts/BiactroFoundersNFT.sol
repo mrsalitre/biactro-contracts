@@ -9,7 +9,6 @@ import "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
-import "hardhat/console.sol";
 
 contract OwnableDelegateProxy {}
 
@@ -51,12 +50,12 @@ Ownable
     require(saleIsActive, "Sale not active");
     
     // Check if presale is active
-    bool isPresale = (PRE_SALE_DATE <= block.timestamp) && preSaleIsActive;
+    bool isPresale = (block.timestamp <= PRE_SALE_DATE) && preSaleIsActive;
 
     // Check if there`s enough tokens to mint
     require(totalSupply() < (isPresale ? MAX_PRE_SALE_SUPPLY : MAX_SUPPLY), "Exceeds max actual supply");
 
-    // Check if the value is correct
+    // Check if the ether value is correct
     require(msg.value >= (isPresale ? PRE_SALE_PRICE : PRICE), "Insufficient actual payment value");
 
     // Check the user is not requiring an invalid token
@@ -82,10 +81,6 @@ Ownable
   /** URI HANDLING **/
 
   string private customBaseURI;
-
-  function setBaseURI(string memory customBaseURI_) external onlyOwner {
-    customBaseURI = customBaseURI_;
-  }
 
   function _baseURI() internal view virtual override returns (string memory) {
     return customBaseURI;
