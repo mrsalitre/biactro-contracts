@@ -37,6 +37,8 @@ Ownable
 
   uint256 public constant PRE_SALE_DATE = 1641340800; // Wednesday, 5 January 2022
 
+  uint256 public constant MAX_MULTIMINT = 20;
+
   uint256 public constant MAX_PRE_SALE_SUPPLY = 900;
 
   uint256 public constant MAX_SUPPLY = 10000;
@@ -45,23 +47,33 @@ Ownable
 
   uint256 public constant PRICE = 60000000000000000;
 
-  function mint(uint256 id) public payable nonReentrant {
+  function mint(uint256[] calldata ids) public payable nonReentrant {
+    
     // Check if the sale is active
     require(saleIsActive, "Sale not active");
+    
+    uint256 count = ids.length;
     
     // Check if presale is active
     bool isPresale = (block.timestamp <= PRE_SALE_DATE) && preSaleIsActive;
 
     // Check if there`s enough tokens to mint
-    require(totalSupply() < (isPresale ? MAX_PRE_SALE_SUPPLY : MAX_SUPPLY), "Exceeds max actual supply");
+    require(totalSupply() + count - 1 < (isPresale ? MAX_PRE_SALE_SUPPLY : MAX_SUPPLY), "Exceeds max actual supply");
 
     // Check if the ether value is correct
-    require(msg.value >= (isPresale ? PRE_SALE_PRICE : PRICE), "Insufficient actual payment value");
+    require(msg.value >= (isPresale ? PRE_SALE_PRICE * count : PRICE * count), "Insufficient actual payment value");
 
     // Check the user is not requiring an invalid token
-    require(id < MAX_SUPPLY && id > 0, "Invalid token id");
 
-    _safeMint(_msgSender(), id);
+    require(count <= MAX_MULTIMINT, "Max mint limit is 20");
+    
+    for (uint256 i = 0; i < count; i++) {
+      uint256 id = ids[i];
+      
+      require(id < MAX_SUPPLY && id > 0, "Invalid token id");
+
+      _safeMint(_msgSender(), id);
+    }
   }
 
   /** ACTIVATION **/

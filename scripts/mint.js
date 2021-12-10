@@ -11,13 +11,11 @@ const main = async () => {
     // Wait for the minted process to finish
     await BiactroFoundersNFTContract.deployed();
 
-    await BiactroFoundersNFTContract.mint(2);
+    await BiactroFoundersNFTContract.mint([2,3,4,55,1056]);
 
-    console.log("token exists: " + await BiactroFoundersNFTContract.exists(1));
+    await BiactroFoundersNFTContract.mint([1]);
 
-    await BiactroFoundersNFTContract.mint(1);
-
-    console.log("token exists: " + await BiactroFoundersNFTContract.exists(1));
+    console.log("total supply: " + await BiactroFoundersNFTContract.totalSupply());
 
     // Get the address of the contract
     const address = BiactroFoundersNFTContract.address;
