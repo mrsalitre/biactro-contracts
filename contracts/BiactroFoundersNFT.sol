@@ -43,9 +43,9 @@ Ownable
 
   uint256 public constant MAX_SUPPLY = 10000;
 
-  uint256 public constant PRE_SALE_PRICE = 15000000000000000;
+  uint256 public constant PRE_SALE_PRICE = 30000000000000000000;
 
-  uint256 public constant PRICE = 60000000000000000;
+  uint256 public constant PRICE = 90000000000000000000;
 
   function mint(uint256[] calldata ids) public payable nonReentrant {
     

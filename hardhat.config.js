@@ -11,8 +11,16 @@ module.exports = {
   solidity: "0.8.4",
   networks: {
     rinkeby: {
-      url: process.env.ALCHEMY_API_KEY,
-      accounts: [process.env.PRIVATE_RINKEDBY_ACCOUNT_KEY],
+      url: process.env.ALCHEMY_RINKEBY_API_KEY,
+      accounts: [process.env.PRIVATE_ACCOUNT_KEY],
     },
+    matic: {
+      url: "https://rpc-mumbai.maticvigil.com",
+      accounts: [process.env.PRIVATE_ACCOUNT_KEY]
+    },
+    testmatic: {
+      url: process.env.ALCHEMY_POLYGON_MUMBAI_API_KEY,
+      accounts: [process.env.PRIVATE_ACCOUNT_KEY]
+    }
   },
 };
