@@ -26,7 +26,7 @@ Ownable
   using Counters for Counters.Counter;
 
   constructor (string memory customBaseURI_, address proxyRegistryAddress_)
-    ERC721("BiactroFoundersNFT", "BFNFT")
+    ERC721("BiactroFounders", "BFOUNDER")
   {
     customBaseURI = customBaseURI_;
 
@@ -35,7 +35,7 @@ Ownable
 
   /** MINTING **/
 
-  uint256 public constant PRE_SALE_DATE = 1641340800; // Wednesday, 5 January 2022
+  uint256 public constant PRE_SALE_DATE = 1644796800; // Wednesday, 5 January 2022
 
   uint256 public constant MAX_MULTIMINT = 20;
 
@@ -43,9 +43,13 @@ Ownable
 
   uint256 public constant MAX_SUPPLY = 10000;
 
-  uint256 public constant PRE_SALE_PRICE = 30000000000000000000;
+  uint256 public constant PRE_SALE_PRICE = 3000000000000000;
 
-  uint256 public constant PRICE = 90000000000000000000;
+  uint256 public constant PRICE = 5200000000000000;
+
+  uint256 public constant OWNER_MINT_LIMIT = 100;
+
+  uint256 public OWNER_MINT_COUNTER = 0;
 
   function mint(uint256[] calldata ids) public payable nonReentrant {
     
@@ -60,27 +64,48 @@ Ownable
     // Check if there`s enough tokens to mint
     require(totalSupply() + count - 1 < (isPresale ? MAX_PRE_SALE_SUPPLY : MAX_SUPPLY), "Exceeds max actual supply");
 
-    // Check if the ether value is correct
-    require(msg.value >= (isPresale ? PRE_SALE_PRICE * count : PRICE * count), "Insufficient actual payment value");
-
-    // Check the user is not requiring an invalid token
-
-    require(count <= MAX_MULTIMINT, "Max mint limit is 20");
-    
-    for (uint256 i = 0; i < count; i++) {
-      uint256 id = ids[i];
+    // Check if the caller is the owner
+    if (msg.sender != owner()) {
+      // Check if the ether value is correct
+      require(msg.value >= (isPresale ? PRE_SALE_PRICE * count : PRICE * count), "Insufficient actual payment value");
       
-      require(id < MAX_SUPPLY && id > 0, "Invalid token id");
+      // Check the user is not requiring an invalid token
+      require(count <= MAX_MULTIMINT, "Max mint limit is 20");
 
-      _safeMint(_msgSender(), id);
+      for (uint256 i = 0; i < count; i++) {
+        uint256 id = ids[i];
+        
+        require(id < MAX_SUPPLY && id > 0, "Invalid token id");
+
+        _safeMint(_msgSender(), id);
+      }
+    } else {
+      // Check if the owner is not exceeding the limit
+      require(OWNER_MINT_COUNTER < OWNER_MINT_LIMIT, "Owner mint limit exceeded");
+      
+      // Check if the owner is not requiring an invalid token
+      require(count <= MAX_MULTIMINT, "Max mint limit is 20");
+
+      // Check if the count is not exceedding the owner limit
+      require(OWNER_MINT_COUNTER + count <= OWNER_MINT_LIMIT, "Owner mint limit exceeded"); 
+
+      for (uint256 i = 0; i < count; i++) {
+        uint256 id = ids[i];
+        
+        require(id < MAX_SUPPLY && id > 0, "Invalid token id");
+
+        _safeMint(msg.sender, id);
+        
+        OWNER_MINT_COUNTER++;
+      }
     }
   }
 
   /** ACTIVATION **/
 
-  bool public saleIsActive = true;
+  bool public saleIsActive = false;
   
-  bool public preSaleIsActive = true;
+  bool public preSaleIsActive = false;
 
   function setSaleIsActive(bool saleIsActive_) external onlyOwner {
     saleIsActive = saleIsActive_;
@@ -100,7 +125,7 @@ Ownable
 
   /** PAYOUT **/
 
-  address private constant payoutAddress1 =
+  address private constant developerPayoutAddress =
     0x7ea1Bb15c6D91827a37697c75b2Eeee930c0C188;
 
   function withdraw() public nonReentrant {
@@ -108,7 +133,7 @@ Ownable
 
     Address.sendValue(payable(owner()), balance * 99 / 100);
 
-    Address.sendValue(payable(payoutAddress1), balance * 1 / 100);
+    Address.sendValue(payable(developerPayoutAddress), balance * 1 / 100);
   }
 
   /** ROYALTIES **/
@@ -156,5 +181,31 @@ Ownable
     }
 
     return super.isApprovedForAll(owner, operator);
+  }
+
+  /** Get wallet of owner **/
+  function walletOfOwner(address _owner)
+    public
+    view
+    returns (uint256[] memory)
+  {
+    uint256 ownerTokenCount = balanceOf(_owner);
+    uint256[] memory ownedTokenIds = new uint256[](ownerTokenCount);
+    uint256 currentTokenId = 1;
+    uint256 ownedTokenIndex = 0;
+
+    while (ownedTokenIndex < ownerTokenCount && currentTokenId <= MAX_SUPPLY) {
+      address currentTokenOwner = ownerOf(currentTokenId);
+
+      if (currentTokenOwner == _owner) {
+        ownedTokenIds[ownedTokenIndex] = currentTokenId;
+
+        ownedTokenIndex++;
+      }
+
+      currentTokenId++;
+    }
+
+    return ownedTokenIds;
   }
 }
