@@ -182,30 +182,4 @@ Ownable
 
     return super.isApprovedForAll(owner, operator);
   }
-
-  /** Get wallet of owner **/
-  function walletOfOwner(address _owner)
-    public
-    view
-    returns (uint256[] memory)
-  {
-    uint256 ownerTokenCount = balanceOf(_owner);
-    uint256[] memory ownedTokenIds = new uint256[](ownerTokenCount);
-    uint256 currentTokenId = 1;
-    uint256 ownedTokenIndex = 0;
-
-    while (ownedTokenIndex < ownerTokenCount && currentTokenId <= MAX_SUPPLY) {
-      address currentTokenOwner = ownerOf(currentTokenId);
-
-      if (currentTokenOwner == _owner) {
-        ownedTokenIds[ownedTokenIndex] = currentTokenId;
-
-        ownedTokenIndex++;
-      }
-
-      currentTokenId++;
-    }
-
-    return ownedTokenIds;
-  }
 }
