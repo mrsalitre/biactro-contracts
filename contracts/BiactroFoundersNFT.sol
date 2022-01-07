@@ -103,9 +103,9 @@ Ownable
 
   /** ACTIVATION **/
 
-  bool public saleIsActive = false;
+  bool public saleIsActive = true;
   
-  bool public preSaleIsActive = false;
+  bool public preSaleIsActive = true;
 
   function setSaleIsActive(bool saleIsActive_) external onlyOwner {
     saleIsActive = saleIsActive_;
@@ -131,9 +131,9 @@ Ownable
   function withdraw() public nonReentrant {
     uint256 balance = address(this).balance;
 
-    Address.sendValue(payable(owner()), balance * 99 / 100);
+    Address.sendValue(payable(owner()), balance * 98 / 100);
 
-    Address.sendValue(payable(developerPayoutAddress), balance * 1 / 100);
+    Address.sendValue(payable(developerPayoutAddress), balance * 2 / 100);
   }
 
   /** ROYALTIES **/
@@ -141,7 +141,7 @@ Ownable
   function royaltyInfo(uint256, uint256 salePrice) external view override
     returns (address receiver, uint256 royaltyAmount)
   {
-    return (address(this), (salePrice * 500) / 10000);
+    return (address(this), (salePrice * 750) / 10000);
   }
 
   function _beforeTokenTransfer(address from, address to, uint256 tokenId)
